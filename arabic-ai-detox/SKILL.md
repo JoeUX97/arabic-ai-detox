@@ -19,6 +19,7 @@ Determine, from the request or the text itself. Ask only if genuinely unclear:
    - Never mix dialects unless the source does on purpose.
 3. **Channel**: product UI, marketing site, LinkedIn/social, formal document, chat. The channel sets how strict orthography should be (see §1).
 4. **Locks**: brand names, product terms, numbers, legal wording, quotes. Never alter these.
+5. **Spelling and grammar**: if `arabic-imla` is installed, run it with `scope: full` and the channel's default policy (UI/formal → fix, social → flag, chat → off) unless the user sets one. Run it **after** your own edits, as the final correctness gate, so it also catches anything a rewrite introduced. Read `digits` and `quotes` from its house-style block when one is supplied.
 
 ## 1. Orthography & punctuation
 
@@ -30,7 +31,7 @@ Determine, from the request or the text itself. Ask only if genuinely unclear:
 | Latin punctuation `,` `?` `;` | Convert to ، ؟ ؛ |
 | Quotes `"..."` | Use «...» in formal/editorial copy; keep "" only if that is the house style. |
 | Mixed digits (3 / ٣) | Pick one system per document. Western digits are the default for product UI and fintech. |
-| Spotless hamza/ة/ى in casual channels | In chat or social-casual registers, do not "correct" the writer's natural spelling. Never introduce errors into formal text. |
+| Spelling (hamza, ة/ه, ى/ي, ض/ظ…) | Not an AI signal. Delegate to `arabic-imla` if installed; otherwise leave spelling alone. Never introduce spelling errors to make text read as human. |
 
 ## 2. English calques (highest-weight signal)
 
@@ -69,10 +70,8 @@ One occurrence in a long formal text can stay. Repetition or stacking is the sig
 
 ## 5. Grammar
 
-- Prefer verbs over nominalized masdar chains.
-- Check non-human plural agreement (feminine singular).
-- Check العدد والمعدود for 3–10 and 11–99.
-- Check dual forms in pronouns and verbs.
+- **Style tell (scored):** prefer verbs over nominalized masdar chains.
+- **Correctness (not scored):** agreement, العدد والمعدود, and visible case endings belong to `arabic-imla`. If it is not installed, check only non-human plural agreement (feminine singular) and العدد والمعدود for 3–10 and 11–99, and report them outside the score.
 
 ## 6. Scoring (audit mode, and pre/post in rewrite mode)
 
@@ -82,7 +81,9 @@ One occurrence in a long formal text can stay. Repetition or stacking is the sig
 | Formula phrases/vocabulary (§3) | 2 per instance |
 | Structure tells (§4) | 2 per pattern |
 | Orthography/punctuation (§1) | 1 per pattern (not per instance) |
-| Grammar (§5) | 1 per instance |
+| Masdar chains (§5) | 1 per instance |
+
+Spelling and grammar findings from `arabic-imla` carry **weight 0** and are reported separately. Clean spelling is not evidence of machine authorship, and errors are not evidence of human authorship.
 
 Normalize per 100 words → **Low < 3**, **Medium 3–7**, **High > 7** likelihood of reading as AI.
 
@@ -99,6 +100,7 @@ State plainly that this measures *perceived* machine style. It is not proof of a
 1. The cleaned text
 2. Change log, 5–10 lines max, grouped by category
 3. Before → after score
+4. If `arabic-imla` ran: its change table under a separate heading (إملاء ونحو), outside the score.
 
 ## Guardrails
 
@@ -106,4 +108,4 @@ State plainly that this measures *perceived* machine style. It is not proof of a
 - Keep meaning and locked terms exact.
 - Don't over-correct into a new monotone: an obvious "de-AI'd" style is its own tell.
 - If a flagged phrase is genuinely the best wording in context, keep it and say why.
-- For Egyptian spoken copy or house-style bans, defer dialect specifics to `arabic-style-curator` if it is installed.
+- For Egyptian spoken copy or house-style bans, defer dialect specifics to `arabic-style-curator`; for spelling and grammar, defer to `arabic-imla`. Use either only if installed.
